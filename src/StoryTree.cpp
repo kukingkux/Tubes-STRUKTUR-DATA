@@ -1,7 +1,17 @@
 #include "StoryTree.h"
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 using namespace std;
+
+void typeText(const string& text, int delayMs = 25) {
+    for (char c : text) {
+        cout << c << flush;
+        this_thread::sleep_for(chrono::milliseconds(delayMs));
+    }
+    cout << "\n";
+}
 
 StoryTree::StoryTree(GameState& s) : state(s) {
     root = buildStory();
@@ -18,7 +28,10 @@ void StoryTree::runNode(StoryNode* node) {
         return;
     }
 
-    cout << "\n" << node->text << "\n";
+    typeText("\n" + node->text + "\n");
+    cout << "\n(Press Enter to continue)";
+    cin.ignore();
+    cin.get();
 
     if (node->effect) {
         node->effect(state);
