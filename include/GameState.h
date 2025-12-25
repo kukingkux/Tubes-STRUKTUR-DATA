@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAMESTATE_H_INCLUDED
+#define GAMESTATE_H_INCLUDED
 #include <string>
 
 struct GameState {
@@ -16,3 +17,5 @@ struct GameState {
     bool joinedScholars = false;
     bool helpedRebels = false;
 };
+
+#endif

@@ -12,6 +12,7 @@ public:
 private:
     GameState& state;
     StoryNode* root;
+    
     void runNode(StoryNode* node);
     StoryNode* buildStory();
 };
