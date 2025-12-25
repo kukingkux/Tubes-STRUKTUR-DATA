@@ -59,20 +59,32 @@ void StoryTree::runNode(StoryNode* node) {
 StoryNode* StoryTree::buildStory() {
     // === ENDINGS ===
     auto orderEnding = new StoryNode {
-        "Skjorheim stands frozen in order. Dragons are hunted to extinction.","", "", nullptr, nullptr, true
+        "Skjorheim stands frozen in order. Dragons are hunted to extinction.\n\n""Dengan kekuatan suara naga, kamu memburu para naga satu per satu.\n"
+        "Langit kembali sunyi. Dunia aman, namun hampa.\n"
+        "Sejarah mengingatmu sebagai pembasmi legenda.","", "", nullptr, nullptr, true
     };
 
     auto chaosEnding = new StoryNode {
-        "Dragons rule the skies again. Civilization burns beneath prophecy.", "", "", nullptr, nullptr, true
+        "Dragons rule the skies again. Civilization burns beneath prophecy.\n\n""Kamu memilih takdir kehancuran.\n"
+        "Para naga kembali menguasai langit.\n"
+        "Kerajaan runtuh, dan dunia terbakar dalam nyanyian kuno.\n"
+        "Kamu dikenang sebagai pembawa akhir zaman.", "", "", nullptr, nullptr, true
     };
 
     auto balanceEnding = new StoryNode {
-        "Some dragons sleep. Some watch. The world endures.", "", "", nullptr, nullptr, true
+        "Some dragons sleep. Some watch. The world endures.\n\n""Tidak semua legenda harus mati.\n"
+        "Sebagian naga tertidur, sebagian mengawasi.\n"
+        "Manusia dan naga hidup dalam ketakutan dan harapan.\n"
+        "Sejarah tidak mencatat namamu, tapi dunia tetap berputar.", "", "", nullptr, nullptr, true
     };
 
     // === DRAGON DECISION ===
     auto dragonChoice = new StoryNode {
-        "A dragon awakens atop Puncak Batu. It watches you silently.",
+        "PUNCAK BATU\n\n"
+        "Angin gunung menusuk tulang.\n"
+        "Di atas reruntuhan candi kuno, seekor naga bangkit.\n"
+        "Bahasanya berat, setiap kata membuat dunia bergetar.\n\n"
+        "\"KAMU MENDENGAR SUARA KAMI.\"",
         "Kill the dragon",
         "Liten to the dragon",
         nullptr,
@@ -84,19 +96,23 @@ StoryNode* StoryTree::buildStory() {
 
     // === FACTIONS ===
     auto rebels = new StoryNode {
-        "The Pribumi beg you to restore the dragons.",
+        "KAMP BERDARAH\n\n""Di hutan sunyi dekat tebing, para Pribumi berkumpul.\n"
+        "Mereka percaya naga harus kembali untuk memenuhi takdir dunia.\n\n"
+        "\"KEHANCURAN ADALAH PEMBAHARUAN,\" kata mereka.",
         "Help them",
         "Refuse",
-        [](GameState& s){ s.chaos += 2; s.helpedRebels = true; }
+        [](GameState& s){ s.chaos += 3; s.helpedRebels = true; }
     };
 
     rebels->left = chaosEnding;
     rebels->left = dragonChoice;
 
     auto scholars = new StoryNode {
-        "Bisikan Akbar offers forbidden dragon knowledge.",
+        "Bisikan Akbar offers forbidden dragon knowledge.\n\n""Para ilmuwan dan peneliti mengumpulkan ukiran kuno.\n"
+        "Mereka memburu rahasia Words of Power.\n\n"
+        "\"PENGETAHUAN ADALAH KEKUATAN,\" kata mereka.",
         "Study the Words",
-        "Reject them",
+        "Reject the forbidden knowledge",
         [](GameState& s){ s.knowledge += 2; s.joinedScholars = true; }
     };
 
@@ -104,7 +120,10 @@ StoryNode* StoryTree::buildStory() {
     scholars->right = rebels;
 
     auto order = new StoryNode {
-        "Sumpah Besi demands you hunt all dragons.",
+        "SUMPAH BESI\n\n"
+        "Para prajurit kerajaan berdiri tegar.\n"
+        "Mereka percaya dunia hanya aman jika naga punah.\n\n"
+        "\"TATANAN HARUS DIJAGA,\" kata mereka.",
         "Join them",
         "Refuse",
         [](GameState& s){ s.order += 2; s.joinedOrder = true; }
@@ -115,10 +134,23 @@ StoryNode* StoryTree::buildStory() {
 
     // === START ===
     auto start = new StoryNode{
-        "You awaken near Benteng Beku. Smoke rises in the distance.",
+        "SKJORHEIM\n\n"
+        "Negeri pegunungan dan hutan pinus.\n"
+        "Sejarah terkubur di bawah es dan darah.\n\n"
+        "Dahulu kala, naga menguasai langit.\n"
+        "Bahasa mereka membuat dunia merintih.\n\n"
+        "Kini, desa kembali terbakar.\n\n"
+        "Kamu terbangun di pinggiran hutan.\n"
+        "Tubuhmu sakit, salju mencair di kakimu.\n\n"
+        "Kamu mencium bau ikan asap dan ketakutan.\n"
+        "Benteng Beku berdiri di kejauhan.\n\n"
+        "Kamu tidak mengingat masa lalumu.\n"
+        "Namun ketika bahaya datang...\n"
+        "DUNIA MENDENGARKAN SUARAMU.",
+        "Mencari Benteng Beku",
+        "Mengikuti bisikan angin",
         "Seek the soldiers",
         "Follow the whispers",
-        nullptr
     };
 
     start->left = order;
