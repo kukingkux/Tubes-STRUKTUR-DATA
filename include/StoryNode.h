@@ -17,3 +17,4 @@ struct StoryNode {
 
     bool isEnding = false;
 };
+
