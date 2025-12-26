@@ -18,7 +18,7 @@ void typeText(const string& text, int delayMs = 25) {
 
     for (char c : text) {
         cout << c << flush;
-        this_thread::sleep_for(chrono::milliseconds(delayMs));
+        this_thread::sleep_for(chrono::milliseconds(textSettings.speedMs));
         if (cin.rdbuf()->in_avail() > 0) {
             cin.get();
             cout << text.substr(&c - &text[0] + 1);
