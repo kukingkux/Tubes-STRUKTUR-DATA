@@ -14,4 +14,6 @@ struct TextSettings {
     bool skipTyping = false;
 };
 
+void typeText(const std::string& text, int delayMs = 25);
+
 #endif
