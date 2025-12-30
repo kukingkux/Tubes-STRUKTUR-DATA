@@ -66,7 +66,7 @@ void StoryTree::runNode(StoryNode* node) {
     cout << "\n(Press Enter to continue)";
     cin.ignore();
     cin.get();
-    
+
     if (node->isEnding) {
         cout << "\n=== TO BE CONTINUED. . . ===\n";
         return;
@@ -88,102 +88,159 @@ void StoryTree::runNode(StoryNode* node) {
 
 StoryNode* StoryTree::buildStory() {
     // === ENDINGS ===
-    auto orderEnding = new StoryNode {
-        "Skjorheim stands frozen in order. Dragons are hunted to extinction.\n\n""Dengan kekuatan suara naga, kamu memburu para naga satu per satu.\n"
-        "Langit kembali sunyi. Dunia aman, namun hampa.\n"
-        "Sejarah mengingatmu sebagai pembasmi legenda.","", "", nullptr, nullptr, true
-    };
+    auto orderEnding = new StoryNode (
+        "ENDING: ORDER\n\n"
+        "Dengan kekuatan suara naga, kamu memburu mereka satu per satu.\n"
+        "Langit kembali sunyi.\n"
+        "Tidak ada lagi bisikan.\n\n"
+        "Dunia aman.\n"
+        "Namun keajaiban mati bersamanya.\n\n"
+        "Sejarah mengingatmu sebagai pembasmi legenda.",
+        "", "", nullptr, nullptr, true
+    );
 
-    auto chaosEnding = new StoryNode {
-        "Dragons rule the skies again. Civilization burns beneath prophecy.\n\n""Kamu memilih takdir kehancuran.\n"
-        "Para naga kembali menguasai langit.\n"
-        "Kerajaan runtuh, dan dunia terbakar dalam nyanyian kuno.\n"
-        "Kamu dikenang sebagai pembawa akhir zaman.", "", "", nullptr, nullptr, true
-    };
+    auto chaosEnding = new StoryNode (
+        "ENDING: CHAOS\n\n"
+        "Kamu memilih takdir kehancuran.\n"
+        "Naga kembali menguasai langit.\n\n"
+        "Kerajaan runtuh.\n"
+        "Api dan teriakan memenuhi dunia.\n\n"
+        "Kamu dikenang sebagai pembawa akhir zaman.",
+        "", "", nullptr, nullptr, true
+    );
 
-    auto balanceEnding = new StoryNode {
-        "Some dragons sleep. Some watch. The world endures.\n\n""Tidak semua legenda harus mati.\n"
-        "Sebagian naga tertidur, sebagian mengawasi.\n"
-        "Manusia dan naga hidup dalam ketakutan dan harapan.\n"
-        "Sejarah tidak mencatat namamu, tapi dunia tetap berputar.", "", "", nullptr, nullptr, true
-    };
+    auto balanceEnding = new StoryNode (
+        "ENDING: BALANCE\n\n"
+        "Tidak semua legenda harus mati.\n"
+        "Sebagian naga tertidur.\n"
+        "Sebagian mengawasi.\n\n"
+        "Manusia hidup dalam ketakutan dan harapan.\n"
+        "Sejarah tidak mencatat namamu.\n\n"
+        "Namun dunia tetap berputar.",
+        "", "", nullptr, nullptr, true
+    );
 
     // === DRAGON DECISION ===
-    auto dragonChoice = new StoryNode {
+    auto dragonDecision = new StoryNode (
         "PUNCAK BATU\n\n"
         "Angin gunung menusuk tulang.\n"
-        "Di atas reruntuhan candi kuno, seekor naga bangkit.\n"
-        "Bahasanya berat, setiap kata membuat dunia bergetar.\n\n"
+        "Reruntuhan candi kuno berdiri di hadapanmu.\n\n"
+        "Tanah bergetar.\n"
+        "Seekor naga tua bangkit dari balik kabut.\n\n"
+        "Bahasanya berat.\n"
+        "Setiap kata membuat dunia merintih.\n\n"
         "\"KAMU MENDENGAR SUARA KAMI.\"",
-        "Kill the dragon",
-        "Liten to the dragon",
+        "Bunuh naga",
+        "Dengarkan naga",
+        orderEnding,
+        balanceEnding,
+        false
+    );
+
+    auto dragonChaos = new StoryNode (
+        "Kata-kata naga meresap ke dalam dirimu.\n"
+        "Kamu bisa merasakan kekuatannya.\n\n"
+        "Langit menggelap.\n"
+        "Takdir menunggu keputusan.",
+        "Gunakan kekuatan naga",
+        "Menarik diri",
         chaosEnding,
         balanceEnding,
         false
-        
-    };
+    );
 
-    dragon->right = dragonChoice;
+    dragonDecision->right = dragonChaos;
+
+    // === INQUISITOR === 
+    auto inquisitor = new StoryNode (
+        "DESA TERBAKAR\n\n"
+        "Api melahap rumah-rumah kayu.\n"
+        "Jeritan bercampur dengan suara baja.\n\n"
+        "Seorang Inquisitor berdiri di tengah kobaran api.\n\n"
+        "\"Jika beberapa harus menderita,\" katanya dingin,\n"
+        "\"itu harga yang pantas untuk ketertiban.\"",
+        "Dukung Inquisitor",
+        "Lawan Inquisitor",
+        dragonDecision,
+        dragonDecision,
+        false
+    );
+
+    // ===== CULTIST =====
+
+    auto cultist = new StoryNode (
+        "HUTAN GELAP\n\n"
+        "Di antara pepohonan pinus, seorang cultist melantunkan Words terlarang.\n\n"
+        "Tanah bergetar pelan.\n"
+        "Langit merespon suaranya.\n\n"
+        "\"KITA ADALAH SUARA YANG TERLUPA,\" bisiknya.",
+        "Bunuh cultist",
+        "Dengarkan cultist",
+        inquisitor,
+        inquisitor,
+        false
+    );
 
     // === FACTIONS ===
-    auto rebels = new StoryNode {
-        "KAMP BERDARAH\n\n""Di hutan sunyi dekat tebing, para Pribumi berkumpul.\n"
-        "Mereka percaya naga harus kembali untuk memenuhi takdir dunia.\n\n"
-        "\"KEHANCURAN ADALAH PEMBAHARUAN,\" kata mereka.",
-        "Help them",
-        "Refuse",
-        [](GameState& s){ s.chaos += 3; s.helpedRebels = true; }
-    };
+    auto rebels = new StoryNode (
+        "KAMP BERDARAH\n\n"
+        "Di hutan sunyi dekat tebing, para Pribumi berkumpul.\n"
+        "Mereka hidup di luar hukum kerajaan.\n\n"
+        "\"Naga harus kembali,\" kata mereka.\n"
+        "\"KEHANCURAN ADALAH PEMBAHARUAN.\"",
+        "Membantu mereka",
+        "Menolak",
+        cultist,
+        dragonDecision,
+        false
+    );
 
-    rebels->left = chaosEnding;
-    rebels->left = dragonChoice;
+    auto scholars = new StoryNode (
+        "BISIKAN AKBAR\n\n"
+        "Para peneliti berkumpul di antara reruntuhan.\n"
+        "Ukiran Words memenuhi dinding batu.\n\n"
+        "\"Pengetahuan adalah kekuatan,\" kata mereka.\n"
+        "\"Dan kekuatan tidak peduli moral.\"",
+        "Mempelajari Words",
+        "Pergi",
+        cultist,
+        rebels,
+        false
+    );
 
-    auto scholars = new StoryNode {
-        "Bisikan Akbar offers forbidden dragon knowledge.\n\n""Para ilmuwan dan peneliti mengumpulkan ukiran kuno.\n"
-        "Mereka memburu rahasia Words of Power.\n\n"
-        "\"PENGETAHUAN ADALAH KEKUATAN,\" kata mereka.",
-        "Study the Words",
-        "Reject the forbidden knowledge",
-        [](GameState& s){ s.knowledge += 2; s.joinedScholars = true; }
-    };
-
-    scholars->left = dragonChoice;
-    scholars->right = rebels;
-
-    auto order = new StoryNode {
-        "SUMPAH BESI\n\n"
-        "Para prajurit kerajaan berdiri tegar.\n"
-        "Mereka percaya dunia hanya aman jika naga punah.\n\n"
+    auto order = new StoryNode (
+        "BENTENG BEKU\n\n"
+        "Benteng berdiri di perbatasan.\n"
+        "Asap dapur, bau ikan asap, dan ketakutan memenuhi udara.\n\n"
+        "Sumpah Besi mengawasi dengan mata dingin.\n\n"
         "\"TATANAN HARUS DIJAGA,\" kata mereka.",
-        "Join them",
-        "Refuse",
-        [](GameState& s){ s.order += 2; s.joinedOrder = true; }
-    };
-
-    order->left = dragonChoice;
-    order->right = scholars;
+        "Bergabung dengan Sumpah Besi",
+        "Menolak",
+        cultist,
+        scholars,
+        false
+    );
 
     // === START ===
-    auto start = new StoryNode{
+    auto start = new StoryNode (
         "SKJORHEIM\n\n"
         "Negeri pegunungan dan hutan pinus.\n"
-        "Sejarah terkubur di bawah es dan darah.\n\n"
+        "Sejarah tertidur di bawah es dan tanah yang mengingat darah.\n\n"
         "Dahulu kala, naga menguasai langit.\n"
         "Bahasa mereka membuat dunia merintih.\n\n"
         "Kini, desa kembali terbakar.\n\n"
         "Kamu terbangun di pinggiran hutan.\n"
-        "Tubuhmu sakit, salju mencair di kakimu.\n\n"
-        "Kamu mencium bau ikan asap dan ketakutan.\n"
-        "Benteng Beku berdiri di kejauhan.\n\n"
+        "Tubuhmu sakit.\n"
+        "Salju mencair di kakimu.\n\n"
         "Kamu tidak mengingat masa lalumu.\n"
-        "Namun ketika bahaya datang...\n"
+        "Namun ketika bahaya datang...\n\n"
         "DUNIA MENDENGARKAN SUARAMU.",
-        "Mencari Benteng Beku",
+        "Menuju Benteng Beku",
         "Mengikuti bisikan angin",
-    };
-
-    start->left = order;
-    start->right = scholars;
+        order,
+        scholars,
+        false
+    );
 
     return start;
 }
