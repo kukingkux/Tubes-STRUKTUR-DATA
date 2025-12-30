@@ -1,7 +1,6 @@
 #ifndef STORYNODE_H_INCLUDED
 #define STORYNODE_H_INCLUDED
 #include <string>
-#include <functional>
 #include "GameState.h"
 
 struct StoryNode {

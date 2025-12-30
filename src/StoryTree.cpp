@@ -1,10 +1,8 @@
 #include "StoryTree.h"
 #include "TextSettings.h"
 #include "BattleSystem.h"
-#include <iostream>
 #include <chrono>
 #include <thread>
-
 using namespace std;
 
 TextSettings textSettings;
@@ -137,12 +135,13 @@ StoryNode* StoryTree::buildStory() {
         "\"KAMU MENDENGAR SUARA KAMI.\"",
         "Kill the dragon",
         "Liten to the dragon",
-        nullptr,
-        [](const GameState& s){ return s.dragonAwakened; }
+        chaosEnding,
+        balanceEnding,
+        false
+        
     };
 
-    dragonChoice->left = orderEnding;
-    dragonChoice->right = balanceEnding;
+    dragon->right = dragonChoice;
 
     // === FACTIONS ===
     auto rebels = new StoryNode {
