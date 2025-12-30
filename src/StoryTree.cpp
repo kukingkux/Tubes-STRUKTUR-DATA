@@ -3,7 +3,10 @@
 #include "BattleSystem.h"
 #include <chrono>
 #include <thread>
+#include <iostream>
 using namespace std;
+
+int playerHP = 100;
 
 TextSettings textSettings;
 
@@ -28,10 +31,6 @@ void typeText(const string& text, int delayMs) {
     cout << "\n";
 }
 
-StoryTree::StoryTree(GameState& s) : state(s) {
-    root = buildStory();
-}
-
 void StoryTree::start() {
     runNode(root);
 }
@@ -39,40 +38,27 @@ void StoryTree::start() {
 void StoryTree::runNode(StoryNode* node) {
     if (!node) return;
 
-    if (node->condition && !node->condition(state)) {
-        return;
-    }
-
     typeText("\n" + node->text + "\n");
 
     if (node->hasBattle) {
-        Battle enemy;
+        Enemy enemy;
 
         if (node->enemyType == 1) {
-            enemy.enemyName = "Cultist";
-            enemy.enemyHP = 35;
-            enemy.enemyMinDmg = 5;
-            enemy.enemyMaxDmg = 10;
+            enemy = {"Cultist", 35, 5, 10};
         } else if (node->enemyType == 2) {
-            enemy.enemyName = "Bandit";
-            enemy.enemyHP = 45;
-            enemy.enemyMinDmg = 7;
-            enemy.enemyMaxDmg = 13;
+            enemy = {"Inquisitor", 50, 8, 14};
         } else if (node->enemyType == 3) {
-            enemy.enemyName = "Dragon";
-            enemy.enemyHP = 80;
-            enemy.enemyMinDmg = 12;
-            enemy.enemyMaxDmg = 18;
+            enemy = {"Dragon", 80, 12, 18};
         }
 
-        BattleResult result = startBattle(state.health, enemy);
+        BattleResult result = startBattle(playerHP, enemy);
 
-        if (result == LOSE) {
-            typeText(RED "\nYou have been defeated by the Cultist...\n" RESET);
+        if (result == BATTLE_LOSE) {
+            typeText("\nYou have been defeated by the Cultist...\n");
             cout << "\n=== GAME OVER ===\n";
             return;
         } else {
-            typeText(GREEN "\nYou defeated the " + enemy.enemyName + "!\n" RESET);
+            typeText(GREEN "\nYou defeated the " + enemy.name + "!\n" RESET);
         }
     }
 
@@ -80,11 +66,7 @@ void StoryTree::runNode(StoryNode* node) {
     cout << "\n(Press Enter to continue)";
     cin.ignore();
     cin.get();
-
-    if (node->effect) {
-        node->effect(state);
-    }
-
+    
     if (node->isEnding) {
         cout << "\n=== TO BE CONTINUED. . . ===\n";
         return;

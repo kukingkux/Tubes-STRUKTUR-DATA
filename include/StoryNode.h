@@ -12,7 +12,7 @@ struct StoryNode {
     StoryNode* right;
 
     bool hasBattle;
-    int enemyType;
+    int enemyType; // 0 none, 1 cultist, 2 inquisitor, 3 dragon
 
     bool isEnding = false;
 };
