@@ -1,7 +1,9 @@
 #include "StoryTree.h"
-#include "BattleSystem.cpp"
-#include "StoryTree.cpp"
+#include "BattleSystem.h"
+#include "TextSettings.h"
 #include <iostream>
+
+extern TextSettings textSettings;
 
 void showMainMenu() {
     int choice;
