@@ -10,10 +10,10 @@
 
 struct TextSettings {
     int speedMs = 25;
-    std::string color = "\033[37m";
+    string color = "\033[37m";
     bool skipTyping = false;
 };
 
-void typeText(const std::string& text, int delayMs = 25);
+void typeText(const string& text, int delayMs = 25);
 
 #endif

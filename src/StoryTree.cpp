@@ -1,6 +1,7 @@
 #include "StoryTree.h"
-#include "TextSettings.h"
 #include "BattleSystem.h"
+#include "TextSettings.h"
+#include <string>
 #include <chrono>
 #include <thread>
 #include <iostream>
@@ -18,18 +19,23 @@ void typeText(const string& text, int delayMs) {
         return;
     }
 
-    for (char c : text) {
-        cout << c << flush;
-        this_thread::sleep_for(chrono::milliseconds(textSettings.speedMs));
+    for (int i = 0; i < (int)text.length(); i++) {
+        cout << text[i] << flush;
+        this_thread::sleep_for(chrono::milliseconds(delayMs));
+
+        // skip typing if user presses Enter
         if (cin.rdbuf()->in_avail() > 0) {
-            cin.get();
-            cout << text.substr(&c - &text[0] + 1);
+            cin.get(); // consume input
+            for (int j = i + 1; j < (int)text.length(); j++) {
+                cout << text[j];
+            }
             break;
         }
     }
 
-    cout << "\n";
+    cout << RESET << "\n";
 }
+
 
 StoryTree::StoryTree() {
     root = buildStory();
@@ -124,36 +130,79 @@ StoryNode* StoryTree::buildStory() {
         "", "", nullptr, nullptr, true
     };
 
-    // === DRAGON DECISION ===
-    auto dragonDecision = new StoryNode {
+    // === DRAGON DECISIONS ===
+    auto dragonArrival = new StoryNode{
         "PUNCAK BATU\n\n"
         "Angin gunung menusuk tulang.\n"
-        "Reruntuhan candi kuno berdiri di hadapanmu.\n\n"
-        "Tanah bergetar.\n"
-        "Seekor naga tua bangkit dari balik kabut.\n\n"
-        "Bahasanya berat.\n"
-        "Setiap kata membuat dunia merintih.\n\n"
-        "\"KAMU MENDENGAR SUARA KAMI.\"",
-        "Bunuh naga",
+        "Kabut tersibak.\n\n"
+        "Seekor naga tua bangkit.\n\n"
+        "“AKHIRNYA…”\n"
+        "“SUARA ITU KEMBALI BERJALAN DI DUNIA.”",
         "Dengarkan naga",
-        orderEnding,
-        balanceEnding,
+        "Tantang naga",
+        nullptr, nullptr,
+        false, 0,
+        false
+    };
+
+    auto dragonListen = new StoryNode{
+        "Kamu menahan napas.\n"
+        "Tidak mengangkat senjata.\n\n"
+        "Naga itu tertawa perlahan.\n\n"
+        "“MANUSIA SELALU DATANG DENGAN BESI.”\n"
+        "“KAU DATANG DENGAN KEHENINGAN.”",
+        "Terima Words naga",
+        "Menarik diri",
+        nullptr, nullptr,
+        false, 0,
         false
     };
 
     auto dragonChaos = new StoryNode {
-        "Kata-kata naga meresap ke dalam dirimu.\n"
-        "Kamu bisa merasakan kekuatannya.\n\n"
+        "Kata-kata naga meresap ke dalam dadamu.\n\n"
         "Langit menggelap.\n"
-        "Takdir menunggu keputusan.",
-        "Gunakan kekuatan naga",
-        "Menarik diri",
+        "Api bangkit.\n\n"
+        "“MAKA BIARKAN DUNIA TERBAKAR KEMBALI.”",
+        "",
+        "",
         chaosEnding,
-        balanceEnding,
+        nullptr,
+        false, 0,
         false
     };
 
-    dragonDecision->right = dragonChaos;
+    auto dragonWithdraw = new StoryNode{
+        "Kamu mundur selangkah.\n\n"
+        "Naga itu mengangguk.\n\n"
+        "“MAKA KAMI AKAN TIDUR.”\n"
+        "“DAN KAU AKAN DILUPAKAN.”",
+        "",
+        "",
+        balanceEnding,
+        nullptr,
+        false, 0,
+        false
+    };
+
+    auto dragonBattle = new StoryNode{
+        "Kamu mengangkat senjatamu.\n\n"
+        "Udara menjadi berat.\n\n"
+        "“MAKA BIARKAN DUNIA MENJADI SAKSI.”",
+        "Lawan naga",
+        "Mundur",
+        orderEnding,
+        balanceEnding,
+        true,      // HAS BATTLE
+        3,         // DRAGON
+        false
+    };
+
+    dragonArrival->left  = dragonListen;
+    dragonArrival->right = dragonBattle;
+
+    dragonListen->left  = dragonChaos;
+    dragonListen->right = dragonWithdraw;
+
 
     // === INQUISITOR === 
     auto inquisitor = new StoryNode {
@@ -165,8 +214,10 @@ StoryNode* StoryTree::buildStory() {
         "\"itu harga yang pantas untuk ketertiban.\"",
         "Dukung Inquisitor",
         "Lawan Inquisitor",
-        dragonDecision,
-        dragonDecision,
+        dragonArrival,
+        dragonArrival,
+        true,
+        2,
         false
     };
 
@@ -182,6 +233,8 @@ StoryNode* StoryTree::buildStory() {
         "Dengarkan cultist",
         inquisitor,
         inquisitor,
+        true,
+        1,
         false
     };
 
@@ -195,7 +248,7 @@ StoryNode* StoryTree::buildStory() {
         "Membantu mereka",
         "Menolak",
         cultist,
-        dragonDecision,
+        dragonArrival,
         false
     };
 
