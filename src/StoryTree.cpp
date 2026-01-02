@@ -1,11 +1,13 @@
 #include "StoryTree.h"
-#include "TextSettings.h"
 #include "BattleSystem.h"
-#include <iostream>
+#include "TextSettings.h"
+#include <string>
 #include <chrono>
 #include <thread>
-
+#include <iostream>
 using namespace std;
+
+int playerHP = 100;
 
 TextSettings textSettings;
 
@@ -17,20 +19,25 @@ void typeText(const string& text, int delayMs) {
         return;
     }
 
-    for (char c : text) {
-        cout << c << flush;
-        this_thread::sleep_for(chrono::milliseconds(textSettings.speedMs));
+    for (int i = 0; i < (int)text.length(); i++) {
+        cout << text[i] << flush;
+        this_thread::sleep_for(chrono::milliseconds(delayMs));
+
+        // skip typing if user presses Enter
         if (cin.rdbuf()->in_avail() > 0) {
-            cin.get();
-            cout << text.substr(&c - &text[0] + 1);
+            cin.get(); // consume input
+            for (int j = i + 1; j < (int)text.length(); j++) {
+                cout << text[j];
+            }
             break;
         }
     }
 
-    cout << "\n";
+    cout << RESET << "\n";
 }
 
-StoryTree::StoryTree(GameState& s) : state(s) {
+
+StoryTree::StoryTree() {
     root = buildStory();
 }
 
@@ -41,40 +48,27 @@ void StoryTree::start() {
 void StoryTree::runNode(StoryNode* node) {
     if (!node) return;
 
-    if (node->condition && !node->condition(state)) {
-        return;
-    }
-
     typeText("\n" + node->text + "\n");
 
     if (node->hasBattle) {
-        Battle enemy;
+        Enemy enemy;
 
         if (node->enemyType == 1) {
-            enemy.enemyName = "Cultist";
-            enemy.enemyHP = 35;
-            enemy.enemyMinDmg = 5;
-            enemy.enemyMaxDmg = 10;
+            enemy = {"Cultist", 35, 5, 10};
         } else if (node->enemyType == 2) {
-            enemy.enemyName = "Bandit";
-            enemy.enemyHP = 45;
-            enemy.enemyMinDmg = 7;
-            enemy.enemyMaxDmg = 13;
+            enemy = {"Inquisitor", 50, 8, 14};
         } else if (node->enemyType == 3) {
-            enemy.enemyName = "Dragon";
-            enemy.enemyHP = 80;
-            enemy.enemyMinDmg = 12;
-            enemy.enemyMaxDmg = 18;
+            enemy = {"Dragon", 80, 12, 18};
         }
 
-        BattleResult result = startBattle(state.health, enemy);
+        BattleResult result = startBattle(playerHP, enemy);
 
-        if (result == LOSE) {
-            typeText(RED "\nYou have been defeated by the Cultist...\n" RESET);
+        if (result == BATTLE_LOSE) {
+            typeText("\nYou have been defeated by the Cultist...\n");
             cout << "\n=== GAME OVER ===\n";
             return;
         } else {
-            typeText(GREEN "\nYou defeated the " + enemy.enemyName + "!\n" RESET);
+            typeText(GREEN "\nYou defeated the " + enemy.name + "!\n" RESET);
         }
     }
 
@@ -82,10 +76,6 @@ void StoryTree::runNode(StoryNode* node) {
     cout << "\n(Press Enter to continue)";
     cin.ignore();
     cin.get();
-
-    if (node->effect) {
-        node->effect(state);
-    }
 
     if (node->isEnding) {
         cout << "\n=== TO BE CONTINUED. . . ===\n";
@@ -109,100 +99,205 @@ void StoryTree::runNode(StoryNode* node) {
 StoryNode* StoryTree::buildStory() {
     // === ENDINGS ===
     auto orderEnding = new StoryNode {
-        "Skjorheim stands frozen in order. Dragons are hunted to extinction.\n\n""Dengan kekuatan suara naga, kamu memburu para naga satu per satu.\n"
-        "Langit kembali sunyi. Dunia aman, namun hampa.\n"
-        "Sejarah mengingatmu sebagai pembasmi legenda.","", "", nullptr, nullptr, true
+        "ENDING: ORDER\n\n"
+        "Dengan kekuatan suara naga, kamu memburu mereka satu per satu.\n"
+        "Langit kembali sunyi.\n"
+        "Tidak ada lagi bisikan.\n\n"
+        "Dunia aman.\n"
+        "Namun keajaiban mati bersamanya.\n\n"
+        "Sejarah mengingatmu sebagai pembasmi legenda.",
+        "", "", nullptr, nullptr, true
     };
 
     auto chaosEnding = new StoryNode {
-        "Dragons rule the skies again. Civilization burns beneath prophecy.\n\n""Kamu memilih takdir kehancuran.\n"
-        "Para naga kembali menguasai langit.\n"
-        "Kerajaan runtuh, dan dunia terbakar dalam nyanyian kuno.\n"
-        "Kamu dikenang sebagai pembawa akhir zaman.", "", "", nullptr, nullptr, true
+        "ENDING: CHAOS\n\n"
+        "Kamu memilih takdir kehancuran.\n"
+        "Naga kembali menguasai langit.\n\n"
+        "Kerajaan runtuh.\n"
+        "Api dan teriakan memenuhi dunia.\n\n"
+        "Kamu dikenang sebagai pembawa akhir zaman.",
+        "", "", nullptr, nullptr, true
     };
 
     auto balanceEnding = new StoryNode {
-        "Some dragons sleep. Some watch. The world endures.\n\n""Tidak semua legenda harus mati.\n"
-        "Sebagian naga tertidur, sebagian mengawasi.\n"
-        "Manusia dan naga hidup dalam ketakutan dan harapan.\n"
-        "Sejarah tidak mencatat namamu, tapi dunia tetap berputar.", "", "", nullptr, nullptr, true
+        "ENDING: BALANCE\n\n"
+        "Tidak semua legenda harus mati.\n"
+        "Sebagian naga tertidur.\n"
+        "Sebagian mengawasi.\n\n"
+        "Manusia hidup dalam ketakutan dan harapan.\n"
+        "Sejarah tidak mencatat namamu.\n\n"
+        "Namun dunia tetap berputar.",
+        "", "", nullptr, nullptr, true
     };
 
-    // === DRAGON DECISION ===
-    auto dragonChoice = new StoryNode {
+    // === DRAGON DECISIONS ===
+    auto dragonArrival = new StoryNode{
         "PUNCAK BATU\n\n"
         "Angin gunung menusuk tulang.\n"
-        "Di atas reruntuhan candi kuno, seekor naga bangkit.\n"
-        "Bahasanya berat, setiap kata membuat dunia bergetar.\n\n"
-        "\"KAMU MENDENGAR SUARA KAMI.\"",
-        "Kill the dragon",
-        "Liten to the dragon",
-        nullptr,
-        [](const GameState& s){ return s.dragonAwakened; }
+        "Kabut tersibak.\n\n"
+        "Seekor naga tua bangkit.\n\n"
+        "“AKHIRNYA…”\n"
+        "“SUARA ITU KEMBALI BERJALAN DI DUNIA.”",
+        "Dengarkan naga",
+        "Tantang naga",
+        nullptr, nullptr,
+        false, 0,
+        false
     };
 
-    dragonChoice->left = orderEnding;
-    dragonChoice->right = balanceEnding;
+    auto dragonListen = new StoryNode{
+        "Kamu menahan napas.\n"
+        "Tidak mengangkat senjata.\n\n"
+        "Naga itu tertawa perlahan.\n\n"
+        "“MANUSIA SELALU DATANG DENGAN BESI.”\n"
+        "“KAU DATANG DENGAN KEHENINGAN.”",
+        "Terima Words naga",
+        "Menarik diri",
+        nullptr, nullptr,
+        false, 0,
+        false
+    };
+
+    auto dragonChaos = new StoryNode {
+        "Kata-kata naga meresap ke dalam dadamu.\n\n"
+        "Langit menggelap.\n"
+        "Api bangkit.\n\n"
+        "“MAKA BIARKAN DUNIA TERBAKAR KEMBALI.”",
+        "",
+        "",
+        chaosEnding,
+        nullptr,
+        false, 0,
+        false
+    };
+
+    auto dragonWithdraw = new StoryNode{
+        "Kamu mundur selangkah.\n\n"
+        "Naga itu mengangguk.\n\n"
+        "“MAKA KAMI AKAN TIDUR.”\n"
+        "“DAN KAU AKAN DILUPAKAN.”",
+        "",
+        "",
+        balanceEnding,
+        nullptr,
+        false, 0,
+        false
+    };
+
+    auto dragonBattle = new StoryNode{
+        "Kamu mengangkat senjatamu.\n\n"
+        "Udara menjadi berat.\n\n"
+        "“MAKA BIARKAN DUNIA MENJADI SAKSI.”",
+        "Lawan naga",
+        "Mundur",
+        orderEnding,
+        balanceEnding,
+        true,      // HAS BATTLE
+        3,         // DRAGON
+        false
+    };
+
+    dragonArrival->left  = dragonListen;
+    dragonArrival->right = dragonBattle;
+
+    dragonListen->left  = dragonChaos;
+    dragonListen->right = dragonWithdraw;
+
+
+    // === INQUISITOR === 
+    auto inquisitor = new StoryNode {
+        "DESA TERBAKAR\n\n"
+        "Api melahap rumah-rumah kayu.\n"
+        "Jeritan bercampur dengan suara baja.\n\n"
+        "Seorang Inquisitor berdiri di tengah kobaran api.\n\n"
+        "\"Jika beberapa harus menderita,\" katanya dingin,\n"
+        "\"itu harga yang pantas untuk ketertiban.\"",
+        "Dukung Inquisitor",
+        "Lawan Inquisitor",
+        dragonArrival,
+        dragonArrival,
+        true,
+        2,
+        false
+    };
+
+    // ===== CULTIST =====
+
+    auto cultist = new StoryNode {
+        "HUTAN GELAP\n\n"
+        "Di antara pepohonan pinus, seorang cultist melantunkan Words terlarang.\n\n"
+        "Tanah bergetar pelan.\n"
+        "Langit merespon suaranya.\n\n"
+        "\"KITA ADALAH SUARA YANG TERLUPA,\" bisiknya.",
+        "Bunuh cultist",
+        "Dengarkan cultist",
+        inquisitor,
+        inquisitor,
+        true,
+        1,
+        false
+    };
 
     // === FACTIONS ===
     auto rebels = new StoryNode {
-        "KAMP BERDARAH\n\n""Di hutan sunyi dekat tebing, para Pribumi berkumpul.\n"
-        "Mereka percaya naga harus kembali untuk memenuhi takdir dunia.\n\n"
-        "\"KEHANCURAN ADALAH PEMBAHARUAN,\" kata mereka.",
-        "Help them",
-        "Refuse",
-        [](GameState& s){ s.chaos += 3; s.helpedRebels = true; }
+        "KAMP BERDARAH\n\n"
+        "Di hutan sunyi dekat tebing, para Pribumi berkumpul.\n"
+        "Mereka hidup di luar hukum kerajaan.\n\n"
+        "\"Naga harus kembali,\" kata mereka.\n"
+        "\"KEHANCURAN ADALAH PEMBAHARUAN.\"",
+        "Membantu mereka",
+        "Menolak",
+        cultist,
+        dragonArrival,
+        false
     };
-
-    rebels->left = chaosEnding;
-    rebels->left = dragonChoice;
 
     auto scholars = new StoryNode {
-        "Bisikan Akbar offers forbidden dragon knowledge.\n\n""Para ilmuwan dan peneliti mengumpulkan ukiran kuno.\n"
-        "Mereka memburu rahasia Words of Power.\n\n"
-        "\"PENGETAHUAN ADALAH KEKUATAN,\" kata mereka.",
-        "Study the Words",
-        "Reject the forbidden knowledge",
-        [](GameState& s){ s.knowledge += 2; s.joinedScholars = true; }
+        "BISIKAN AKBAR\n\n"
+        "Para peneliti berkumpul di antara reruntuhan.\n"
+        "Ukiran Words memenuhi dinding batu.\n\n"
+        "\"Pengetahuan adalah kekuatan,\" kata mereka.\n"
+        "\"Dan kekuatan tidak peduli moral.\"",
+        "Mempelajari Words",
+        "Pergi",
+        cultist,
+        rebels,
+        false
     };
-
-    scholars->left = dragonChoice;
-    scholars->right = rebels;
 
     auto order = new StoryNode {
-        "SUMPAH BESI\n\n"
-        "Para prajurit kerajaan berdiri tegar.\n"
-        "Mereka percaya dunia hanya aman jika naga punah.\n\n"
+        "BENTENG BEKU\n\n"
+        "Benteng berdiri di perbatasan.\n"
+        "Asap dapur, bau ikan asap, dan ketakutan memenuhi udara.\n\n"
+        "Sumpah Besi mengawasi dengan mata dingin.\n\n"
         "\"TATANAN HARUS DIJAGA,\" kata mereka.",
-        "Join them",
-        "Refuse",
-        [](GameState& s){ s.order += 2; s.joinedOrder = true; }
+        "Bergabung dengan Sumpah Besi",
+        "Menolak",
+        cultist,
+        scholars,
+        false
     };
 
-    order->left = dragonChoice;
-    order->right = scholars;
-
     // === START ===
-    auto start = new StoryNode{
+    auto start = new StoryNode {
         "SKJORHEIM\n\n"
         "Negeri pegunungan dan hutan pinus.\n"
-        "Sejarah terkubur di bawah es dan darah.\n\n"
+        "Sejarah tertidur di bawah es dan tanah yang mengingat darah.\n\n"
         "Dahulu kala, naga menguasai langit.\n"
         "Bahasa mereka membuat dunia merintih.\n\n"
         "Kini, desa kembali terbakar.\n\n"
         "Kamu terbangun di pinggiran hutan.\n"
-        "Tubuhmu sakit, salju mencair di kakimu.\n\n"
-        "Kamu mencium bau ikan asap dan ketakutan.\n"
-        "Benteng Beku berdiri di kejauhan.\n\n"
+        "Tubuhmu sakit.\n"
+        "Salju mencair di kakimu.\n\n"
         "Kamu tidak mengingat masa lalumu.\n"
-        "Namun ketika bahaya datang...\n"
+        "Namun ketika bahaya datang...\n\n"
         "DUNIA MENDENGARKAN SUARAMU.",
-        "Mencari Benteng Beku",
+        "Menuju Benteng Beku",
         "Mengikuti bisikan angin",
+        order,
+        scholars,
+        false
     };
-
-    start->left = order;
-    start->right = scholars;
 
     return start;
 }
