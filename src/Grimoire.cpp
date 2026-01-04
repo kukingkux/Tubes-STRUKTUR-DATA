@@ -95,6 +95,34 @@ void Grimoire::forgetWord(int index) {
     }
 }
 
+int Grimoire::useWordInBattle() {
+    if (isEmpty()) {
+        cout << "You have no words to use!\n";
+        return 0;
+    }
+
+    listWords();
+    cout << "Select a word to cast (0 to cancel): ";
+
+    int idx;
+    cin >> idx;
+
+    if (cin.fail()) {
+        clearInputBuffer();
+        return 0;
+    }
+
+    if (idx <= 0) return 0;
+
+    GrimoireNode* node = getNodeAt(idx - 1);
+    if (node) {
+        cout << "You channel the energy of " << node->data.name << "...\n";
+        return node->data.power;
+    }
+
+    return 0;
+}
+
 void Grimoire::openMenu() {
     while(true) {
          cout << CYAN "\n=== GRIMOIRE MANAGEMENT ===\n" RESET;

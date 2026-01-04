@@ -285,7 +285,7 @@ StoryNode* StoryTree::buildStory() {
         "eyes wild with hunger.\n\n"
         "The hunt is joined.",
         "Continue", "Continue",
-        pathChoice, pathChoice,
+        runeStone, runeStone,
         true, 2, false, 0
     };
 
