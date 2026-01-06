@@ -1,5 +1,5 @@
-#ifndef USERINTERFACE_H_INCLUDED
-#define USERINTERFACE_H_INCLUDED
+#ifndef UI_H_INCLUDED
+#define UI_H_INCLUDED
 
 #include <string>
 #include <vector>
