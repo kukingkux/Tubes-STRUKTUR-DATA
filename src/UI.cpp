@@ -10,8 +10,12 @@ namespace UI {
         printDivider();
     }
 
-    void printDivider() {
-        std::cout << textSettings.color << "------------------------------" << RESET << "\n";
+    void printDivider(const std::string& label) {
+        if (label.empty()) {
+            std::cout << textSettings.color << "-----------------------------------------" << RESET << "\n";
+        } else {
+            std::cout << textSettings.color << "--- [ " << label << " ] ---" << RESET << "\n";
+        }
     }
 
     void printMenu(const std::vector<std::string>& options) {
@@ -28,7 +32,7 @@ namespace UI {
     }
 
     void printBattleStatus(int playerHP, int enemyHP, const std::string& enemyName) {
-        printDivider();
+        printDivider("BATTLE STATUS");
         std::cout << GREEN << "PLAYER HP: " << playerHP << RESET
                 << "  vs  "
                 << RED << enemyName << " HP: " << enemyHP << RESET << "\n";
@@ -37,5 +41,10 @@ namespace UI {
 
     void printSystemMessage(const std::string& msg) {
         std::cout << "\n" << YELLOW << "*** " << msg << " ***" << RESET << "\n";
+    }
+
+    void printBattleMessage(const std::string& msg) {
+        std::cout << "\n" << RED << "[BATTLE]"<< RESET;
+        typeText(msg;)
     }
 };
