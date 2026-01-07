@@ -1,20 +1,10 @@
 #include "BattleSystem.h"
-#include "TextSettings.h"
+#include "Utils.h"
 #include <string>
 #include <iostream>
 #include <cstdlib>
 #include <limits>
 using namespace std;
-
-void damageOutput(int index, int damage, string enemy) {
-    // 0 = Player Dmg
-    // 1 = Enemy Dmg
-    if (index == 0) {
-        cout << "You dealt " << damage << " damage to " << enemy << "!\n";
-    } else if (index == 1) {
-        cout << "You take " << damage << " damage!\n";
-    }
-}
 
 BattleResult startBattle(int& playerHP, Enemy enemy, Grimoire& grimoire) {
     bool battleOver = false;

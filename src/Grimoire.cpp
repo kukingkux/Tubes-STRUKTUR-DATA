@@ -1,5 +1,5 @@
 #include "Grimoire.h"
-#include "TextSettings.h"
+#include "Utils.h"
 #include <iostream>
 #include <limits>
 using namespace std;
@@ -7,6 +7,7 @@ using namespace std;
 static void clearInputBuffer() {
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    clearInput();
 }
 
 Grimoire::Grimoire() : head(nullptr) {}

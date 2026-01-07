@@ -1,9 +1,7 @@
 #include "StoryTree.h"
 #include "BattleSystem.h"
-#include "TextSettings.h"
+#include "Utils.h"
 #include <iostream>
-
-extern TextSettingsStruct textSettings;
 
 void showMainMenu() {
     int choice;
