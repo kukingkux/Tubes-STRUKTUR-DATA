@@ -1,6 +1,6 @@
 #include "StoryTree.h"
 #include "BattleSystem.h"
-#include "TextSettings.h"
+#include "Utils.h"
 #include <string>
 #include <chrono>
 #include <thread>

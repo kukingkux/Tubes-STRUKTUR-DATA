@@ -1,5 +1,5 @@
 #include "Grimoire.h"
-#include "TextSettings.h"
+#include "Utils.h"
 #include <iostream>
 #include <limits>
 using namespace std;

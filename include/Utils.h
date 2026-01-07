@@ -1,6 +1,7 @@
-#ifndef TEXTSETTINGS_H_INCLUDED
-#define TEXTSETTINGS_H_INCLUDED
+#ifndef UTILS_H_INCLUDED
+#define UTILS_H_INCLUDED
 #include <string>
+#include <iostream>
 
 // COLORS
 #define RESET   "\033[0m"
@@ -19,7 +20,12 @@ struct TextSettingsStruct {
 // Global settings instance
 extern TextSettingsStruct textSettings;
 
+// Utils
 void typeText(const std::string& text, int delayMs = 25);
+void clearInput();
+std::string loadStoryText(const std::string& filepath);
+
+// Battle
 void damageOutput(int index, int damage, std::string enemy = "");
 
 #endif
