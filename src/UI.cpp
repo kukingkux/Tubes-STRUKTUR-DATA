@@ -21,4 +21,21 @@ namespace UI {
         }
         std::cout << textSettings.color << "Choose: " << RESET;
     }
+
+    void printDialogue(const std::string& speaker, const std::string& text) {
+        std::cout << "\n" << CYAN << "[" << speaker << "]" << RESET << "\n";
+        typeText(textSettings.color + "\"" + text + "\"" + RESET);
+    }
+
+    void printBattleStatus(int playerHP, int enemyHP, const std::string& enemyName) {
+        printDivider();
+        std::cout << GREEN << "PLAYER HP: " << playerHP << RESET
+                << "  vs  "
+                << RED << enemyName << " HP: " << enemyHP << RESET << "\n";
+        printDivider();
+    }
+
+    void printSystemMessage(const std::string& msg) {
+        std::cout << "\n" << YELLOW << "*** " << msg << " ***" << RESET << "\n";
+    }
 };
