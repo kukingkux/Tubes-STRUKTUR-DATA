@@ -61,12 +61,14 @@ string loadStoryText(const string& filepath) {
     return buffer.str();
 }
 
-void damageOutput(int index, int damage, string enemy) {
+string damageOutput(int index, int damage, string enemy) {
     // 0 = Player Dmg
     // 1 = Enemy Dmg
     if (index == 0) {
-        cout << "You dealt " << damage << " damage to " << enemy << "!\n";
+        return "You dealt " + to_string(damage) + " damage to " + enemy + "!\n";
     } else if (index == 1) {
-        cout << "You take " << damage << " damage!\n";
+        return "You take " + to_string(damage) + " damage!\n";
     }
+
+    return "";
 }

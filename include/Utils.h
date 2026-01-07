@@ -26,6 +26,6 @@ void clearInput();
 std::string loadStoryText(const std::string& filepath);
 
 // Battle
-void damageOutput(int index, int damage, std::string enemy = "");
+std::string damageOutput(int index, int damage, std::string enemy = "");
 
 #endif
