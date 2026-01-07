@@ -6,16 +6,6 @@
 #include <limits>
 using namespace std;
 
-void damageOutput(int index, int damage, string enemy) {
-    // 0 = Player Dmg
-    // 1 = Enemy Dmg
-    if (index == 0) {
-        cout << "You dealt " << damage << " damage to " << enemy << "!\n";
-    } else if (index == 1) {
-        cout << "You take " << damage << " damage!\n";
-    }
-}
-
 BattleResult startBattle(int& playerHP, Enemy enemy, Grimoire& grimoire) {
     bool battleOver = false;
     bool playerTurn = true;

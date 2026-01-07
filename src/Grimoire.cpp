@@ -7,6 +7,7 @@ using namespace std;
 static void clearInputBuffer() {
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    clearInput();
 }
 
 Grimoire::Grimoire() : head(nullptr) {}
