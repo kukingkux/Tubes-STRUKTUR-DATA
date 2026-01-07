@@ -1,10 +1,12 @@
 #include "StoryTree.h"
 #include "BattleSystem.h"
 #include "Utils.h"
+#include "UI.h"
 #include <string>
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <vector>
 #include <limits>
 #include <fstream>
 #include <sstream>
@@ -84,7 +86,20 @@ void StoryTree::runNode(StoryNode* node) {
         }
     }
 
-    typeText("\n" + displayText + "\n");
+    // Dialogue Parsing
+    stringstream ss(displayText);
+    string line;
+    while(getline(ss, line, '\n')) {
+        if (line.empty()) continue;
+
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+
+        if (line.find("“") != string::npos || line.find("\"") != string::npos) {
+            UI::printDialogue("???", line);
+        } else {
+            UI::printNarration(line);
+        }
+    }
 
     if (node->hasBattle) {
         Enemy enemy;
@@ -101,11 +116,11 @@ void StoryTree::runNode(StoryNode* node) {
         BattleResult result = startBattle(state.health, enemy, state.grimoire);
 
         if (result == BATTLE_LOSE) {
-            typeText("\nYour heads ringing and your vision slowly fades to black...\n");
-            cout << "\n=== GAME OVER ===\n";
+            UI::printSystemMessage("Your heads ringing and your vision slowly fades to black...");
+            UI::printHeader("=== GAME OVER ===");
             exit(0);
         } else {
-            typeText(GREEN "\nVictory Achieved!\n" RESET);
+            UI::printSystemMessage("Victory Achieved!");
         }
     }
 
@@ -114,14 +129,14 @@ void StoryTree::runNode(StoryNode* node) {
     cin.get();
 
     if (node->isEnding) {
-        cout << "\n=== TO BE CONTINUED. . . ===\n";
+        UI::printHeader("=== TO BE CONTINUED. . . ===");
         return;
     }
-
-    cout << "1. " << node->choiceA << "\n";
-    cout << "2. " << node->choiceB << "\n";
-    cout << "Choose: ";
-
+    
+    vector<string> options;
+    options.push_back(node->choiceA);
+    options.push_back(node->choiceB);
+    UI::printMenu(options);
     int choice;
     cin >> choice;
 
