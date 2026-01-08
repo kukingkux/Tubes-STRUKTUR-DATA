@@ -4,6 +4,7 @@
 #include "UI.h"
 #include <iostream>
 #include <vector>
+#include <string>
 #include <cstring>
 
 void showMainMenu() {
@@ -28,6 +29,12 @@ void showMainMenu() {
 
         if (choice == 1) break;
         if (choice == 2) {
+            UI::printHeader("   Text Settings");
+
+            std::vector<std::string> settingsMenu;
+            settingsMenu.push_back("Typing Speed");
+            settingsMenu.push_back("Text Color");
+            settingsMenu.push_back("Skip Typing: ");
             int c;
             
             std::vector<std::string> speedOptions;
@@ -44,9 +51,9 @@ void showMainMenu() {
             if (c == 3) textSettings.speedMs = 50;
 
             std::vector<std::string> colorOptions;
-            speedOptions.push_back("White");
-            speedOptions.push_back("Cyan");
-            speedOptions.push_back("Yellow");
+            colorOptions.push_back("White");
+            colorOptions.push_back("Cyan");
+            colorOptions.push_back("Yellow");
 
             std::cout << "\nText Color:";
             UI::printMenu(colorOptions);
@@ -57,10 +64,10 @@ void showMainMenu() {
             if (c == 3) textSettings.color = YELLOW;
 
             std::vector<std::string> skipOptions;
-            speedOptions.push_back("Yes");
-            speedOptions.push_back("No");
+            skipOptions.push_back("Yes");
+            skipOptions.push_back("No");
 
-            std::cout << "\nTyping Speed:";
+            std::cout << "\nAlways Skip Dialogue?:";
             UI::printMenu(skipOptions);
             std::cin >> c;
 
