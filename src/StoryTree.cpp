@@ -70,9 +70,6 @@ void StoryTree::runNode(StoryNode* node) {
     int wordCount = state.grimoire.getWordCount();
     bool upgraded = state.grimoire.hasUpgradedWords();
 
-    int wordCount = state.grimoire.getWordCount();
-    bool upgraded = state.grimoire.hasUpgradedWords();
-
     if (node->isEnding) {
         if (wordCount == 0) {
             displayText += "\n\n(You faced the end with silence in your heart.)";
