@@ -49,7 +49,12 @@ void StoryTree::runNode(StoryNode* node) {
     if (node->eventId == 1) {
         state.grimoire.learnWord("FUS", "Unleash Force", 10);
     } else if (node->eventId == 2) {
-        state.grimoire.openMenu();
+        state.grimoire.openMenu(state.canUpgradeWord);
+    } else if (node->eventId == 5) {
+        if (!state.canUpgradeWord) {
+            state.canUpgradeWord = true;
+            UI::printSystemMessage(YELLOW "You feel a surge of ancient power. Your mind is ready to deepen its knowledge." RESET);
+        }
     }
 
     // ASCII Art
@@ -290,10 +295,17 @@ StoryNode* StoryTree::buildStory() {
         false, 0, false, 1
     };
 
+    auto ancientShrine = new StoryNode {
+        "story_text/ancient_shrine.txt",
+        "Return to Fire", "Return to Fire",
+        campfire, campfire,
+        false, 0, false, 5 // Event ID 5: Upgrade
+    };
+
     auto runeLearn = new StoryNode {
         "story_text/rune_stone.txt", // "You learned a word!"
-        "Continue", "Continue",
-        campfire, campfire,
+        "Campfire", "Visit Ancient Shrine",
+        campfire, ancientShrine,
         false, 0, false, 1 // Learn word here
     };
     
