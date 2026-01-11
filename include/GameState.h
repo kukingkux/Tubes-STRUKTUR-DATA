@@ -8,9 +8,8 @@ struct GameState {
     int health = 100;
 
     // Moral axes
-    int order = 0;
-    int knowledge = 0;
-    int chaos = 0;
+    int orderPoints = 0;
+    int chaosPoints = 0;
 
     // World Flags
     bool dragonAwakened = false;
