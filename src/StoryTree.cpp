@@ -55,13 +55,23 @@ void StoryTree::runNode(StoryNode* node) {
             state.canUpgradeWord = true;
             UI::printSystemMessage(YELLOW "You feel a surge of ancient power. Your mind is ready to deepen its knowledge." RESET);
         }
+    } else if (node->eventId == 6) {
+        state.grimoire.learnWord("FEIM", "Fade Away", 8);
     }
 
-    // ASCII Art
+    // ASCII Art implementation
     if (node->text == "story_text/campfire.txt") {
         UI::printCampfire();
     } else if (node->text == "story_text/dragon_battle.txt" || node->text == "story_text/dragon_voice.txt" || node->text == "story_text/dragon_choice.txt") {
         UI::printDragon();
+    } else if (node->text == "story_text/wolf_battle.txt") {
+        UI::printWolf();
+    } else if (node->text == "story_text/rune_discovery.txt") {
+        UI::printRuneStone();
+    } else if (node->text == "story_text/ancient_shrine.txt") {
+        UI::printTouched();
+    } else if (node->text == "story_text/iron_vow.txt") {
+        UI::printFortress();
     } else if (node->text == "story_text/ending_order.txt") {
         UI::printEnding("ORDER");
     } else if (node->text == "story_text/ending_chaos.txt") {
@@ -255,7 +265,7 @@ StoryNode* StoryTree::buildStory() {
         "story_text/iron_vow.txt",
         "Pledge loyalty (Order +)", "Remain independent",
         dragonRouter1, dragonRouter2,
-        false, 0, false, 0
+        false, 0, false, 6 // Event ID 6
     };
 
     auto whisperingWoods = new StoryNode{
