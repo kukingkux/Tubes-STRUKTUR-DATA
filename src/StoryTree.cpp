@@ -49,14 +49,29 @@ void StoryTree::runNode(StoryNode* node) {
     if (node->eventId == 1) {
         state.grimoire.learnWord("FUS", "Unleash Force", 10);
     } else if (node->eventId == 2) {
-        state.grimoire.openMenu();
+        state.grimoire.openMenu(state.canUpgradeWord);
+    } else if (node->eventId == 5) {
+        if (!state.canUpgradeWord) {
+            state.canUpgradeWord = true;
+            UI::printSystemMessage(YELLOW "You feel a surge of ancient power. Your mind is ready to deepen its knowledge." RESET);
+        }
+    } else if (node->eventId == 6) {
+        state.grimoire.learnWord("FEIM", "Fade Away", 8);
     }
 
-    // ASCII Art
+    // ASCII Art implementation
     if (node->text == "story_text/campfire.txt") {
         UI::printCampfire();
     } else if (node->text == "story_text/dragon_battle.txt" || node->text == "story_text/dragon_voice.txt" || node->text == "story_text/dragon_choice.txt") {
         UI::printDragon();
+    } else if (node->text == "story_text/wolf_battle.txt") {
+        UI::printWolf();
+    } else if (node->text == "story_text/rune_discovery.txt") {
+        UI::printRuneStone();
+    } else if (node->text == "story_text/ancient_shrine.txt") {
+        UI::printTouched();
+    } else if (node->text == "story_text/iron_vow.txt") {
+        UI::printFortress();
     } else if (node->text == "story_text/ending_order.txt") {
         UI::printEnding("ORDER");
     } else if (node->text == "story_text/ending_chaos.txt") {
@@ -250,7 +265,7 @@ StoryNode* StoryTree::buildStory() {
         "story_text/iron_vow.txt",
         "Pledge loyalty (Order +)", "Remain independent",
         dragonRouter1, dragonRouter2,
-        false, 0, false, 0
+        false, 0, false, 6 // Event ID 6
     };
 
     auto whisperingWoods = new StoryNode{
@@ -290,10 +305,17 @@ StoryNode* StoryTree::buildStory() {
         false, 0, false, 1
     };
 
+    auto ancientShrine = new StoryNode {
+        "story_text/ancient_shrine.txt",
+        "Return to Fire", "Return to Fire",
+        campfire, campfire,
+        false, 0, false, 5 // Event ID 5: Upgrade
+    };
+
     auto runeLearn = new StoryNode {
         "story_text/rune_stone.txt", // "You learned a word!"
-        "Continue", "Continue",
-        campfire, campfire,
+        "Campfire", "Visit Ancient Shrine",
+        campfire, ancientShrine,
         false, 0, false, 1 // Learn word here
     };
     
