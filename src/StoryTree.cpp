@@ -20,6 +20,21 @@ void StoryTree::start() {
 void StoryTree::runNode(StoryNode* node) {
     if (!node) return;
 
+    // Ending Judgement
+    if (node->eventId == 99) {
+        int diff = state.orderPoints - state.chaosPoints;
+
+        if (diff > 1) {
+            node->text = "story_text/ending_order.txt";
+        } else if (diff < -1) {
+            node->text = "story_text/ending_chaos.txt";
+        } else {
+            node->text = "story_text/ending_balance.txt";
+        }
+        node->isEnding = true;
+    }
+
+    // Router: Dragon Check
     if (node->eventId == 3) {
         int wordCount = state.grimoire.getWordCount();
         bool upgraded = state.grimoire.hasUpgradedWords();
@@ -34,6 +49,7 @@ void StoryTree::runNode(StoryNode* node) {
         return;
     }
 
+    // Router: Strength Check
     if (node->eventId == 4) {
         int wordCount = state.grimoire.getWordCount();
         bool upgraded = state.grimoire.hasUpgradedWords();
@@ -46,6 +62,17 @@ void StoryTree::runNode(StoryNode* node) {
         return;
     }
 
+    // Event Handlers
+
+    // Iron Vow: +Order
+    if (node->eventId == 6) {
+        if (!node->isEnding) {
+            state.orderPoints += 3;
+            UI::printSystemMessage("Order +3 (Iron Vow)");
+            node->eventId = 0;
+        }
+    }
+
     if (node->eventId == 1) {
         state.grimoire.learnWord("FUS", "Unleash Force", 10);
     } else if (node->eventId == 2) {
@@ -53,10 +80,9 @@ void StoryTree::runNode(StoryNode* node) {
     } else if (node->eventId == 5) {
         if (!state.canUpgradeWord) {
             state.canUpgradeWord = true;
-            UI::printSystemMessage(YELLOW "You feel a surge of ancient power. Your mind is ready to deepen its knowledge." RESET);
+            state.grimoire.learnWord("FEIM", "Fade Away", 8);
+            UI::printSystemMessage(YELLOW "You feel a surge of ancient power. 'FEIM' is etched into your mind." RESET);
         }
-    } else if (node->eventId == 6) {
-        state.grimoire.learnWord("FEIM", "Fade Away", 8);
     }
 
     // ASCII Art implementation
@@ -126,6 +152,7 @@ void StoryTree::runNode(StoryNode* node) {
         }
     }
 
+    // Battle Logic
     if (node->hasBattle) {
         Enemy enemy;
         enemy.type = node->enemyType;
@@ -138,7 +165,7 @@ void StoryTree::runNode(StoryNode* node) {
             enemy = {"Phalanx the Ancient Dragon", 100, 10, 20};
         }
 
-        BattleResult result = startBattle(state.health, enemy, state.grimoire);
+        BattleResult result = startBattle(state.health, state.chaosPoints, enemy, state.grimoire);
 
         if (result == BATTLE_LOSE) {
             UI::printSystemMessage("Your heads ringing and your vision slowly fades to black...");
@@ -170,6 +197,16 @@ void StoryTree::runNode(StoryNode* node) {
         choice = 0;
     }
 
+    if (node->eventId == 11) {
+        if (choice == 1) {
+            state.chaosPoints += 3;
+            UI::printSystemMessage("Chaos +3 (Forbidden Knowledge)");
+        } else {
+            state.orderPoints += 1;
+            UI::printSystemMessage("Order +1 (Resisting Temptation)");
+        }
+    }
+
     if (choice == 1) {
         runNode(node->left);
     } else {
@@ -194,28 +231,26 @@ StoryNode* StoryTree::buildStory() {
         "", "", nullptr, nullptr, false, 0, true, 0
     };
 
+    // ENDING JUDGEMENT
+    auto judgementNode = new StoryNode {
+        "",
+        "", "", nullptr, nullptr, false, 0, false, 99 // Event 99 = Judgement
+    };
+
     // === DRAGON ===
     // Dragon Battle
     auto dragonBattleNode = new StoryNode{
         "story_text/dragon_battle.txt",
-        "Continue", "Continue",
-        endingOrder, endingOrder,
+        "Face Judgement", "Face Judgement",
+        judgementNode, judgementNode,
         true, 3, false, 0
     };
 
     // Listen Branch
     auto listenBranch = new StoryNode{
         "story_text/listen_branch.txt",
-        "Accept the Chaos", "Seek Balance",
-        endingChaos, endingBalance,
-        false, 0, false, 0
-    };
-
-   // Dragon Choice
-    auto dragonChoice = new StoryNode{
-        "story_text/dragon_choice.txt",
-        "Challenge the Dragon", "Listen to the Dragon",
-        dragonBattleNode, listenBranch,
+        "Embrace the Fire", "Stand Firm",
+        judgementNode, judgementNode,
         false, 0, false, 0
     };
 
@@ -227,6 +262,15 @@ StoryNode* StoryTree::buildStory() {
         dragonBattleNode, listenBranch,
         false, 0, false, 0
     };
+
+   // Dragon Choice
+    auto dragonChoice = new StoryNode{
+        "story_text/dragon_choice.txt",
+        "Challenge the Dragon", "Listen to the Dragon",
+        dragonBattleNode, listenBranch,
+        false, 0, false, 0
+    };
+
 
     // Touched 1 word
     auto dragonTouched = new StoryNode{
@@ -259,33 +303,11 @@ StoryNode* StoryTree::buildStory() {
         false, 0, false, 3 // Event ID 3
     };
 
-    // === Story ===
-    // Factions
-    auto ironVow = new StoryNode{
-        "story_text/iron_vow.txt",
-        "Pledge loyalty (Order +)", "Remain independent",
-        dragonRouter1, dragonRouter2,
-        false, 0, false, 6 // Event ID 6
-    };
-
-    auto whisperingWoods = new StoryNode{
-        "story_text/whispering_woods.txt",
-        "Study the runes (Knowledge +)", "Ignore the heresy",
-        dragonRouter1, dragonRouter1,
-        false, 0, false, 0
-    };
-
-    auto pathChoice = new StoryNode {
-        "story_text/path_choice.txt",
-        "Go west (Godrei's Fortress)", "Go East Woods",
-        ironVow, whisperingWoods,
-        false, 0, false, 0
-    };
-
+    // EARLY GAME OBJECTS
     auto campfire = new StoryNode {
         "story_text/campfire.txt",
         "Meditate (Open Grimoire)", "Continue Journey",
-        nullptr, pathChoice,
+        nullptr, nullptr,
         false, 0, false, 2
     };
 
@@ -295,38 +317,61 @@ StoryNode* StoryTree::buildStory() {
         campfire, campfire,
         false, 0, false, 2
     };
-
     campfire->left = grimoireNode;
-
-    auto runeStone = new StoryNode {
-        "story_text/rune_stone.txt",
-        "Touch the Stone", "Examine closely",
-        campfire, campfire,
-        false, 0, false, 1
-    };
-
-    auto ancientShrine = new StoryNode {
-        "story_text/ancient_shrine.txt",
-        "Return to Fire", "Return to Fire",
-        campfire, campfire,
-        false, 0, false, 5 // Event ID 5: Upgrade
-    };
-
-    auto runeLearn = new StoryNode {
-        "story_text/rune_stone.txt", // "You learned a word!"
-        "Campfire", "Visit Ancient Shrine",
-        campfire, ancientShrine,
-        false, 0, false, 1 // Learn word here
+    
+    auto preBattleCampfire = new StoryNode {
+        "story_text/campfire.txt",
+        "Meditate (Open Grimoire)", "Proceed to the Dragon Hill",
+        grimoireNode, dragonRouter1,
+        false, 0, false, 2
     };
     
+    // Ancient Shrine
+    auto ancientShrine = new StoryNode {
+        "story_text/ancient_shrine.txt",
+        "Ascend the Mountain", "Ascend the Mountain",
+        preBattleCampfire, preBattleCampfire,
+        false, 0, false, 5 // Event ID 5: Upgrade
+    };
+    
+    // === Story ===
+
+    // Factions
+    auto ironVow = new StoryNode{
+        "story_text/iron_vow.txt",
+        "Swear your blade", "Remain independent",
+        ancientShrine, ancientShrine,
+        false, 0, false, 6 // Event ID 6
+    };
+
+    auto whisperingWoods = new StoryNode{
+        "story_text/whispering_woods.txt",
+        "Study the runes", "Ignore the heresy",
+        ancientShrine, ancientShrine,
+        false, 0, false, 11 // Event ID 11
+    };
+
+    auto pathChoice = new StoryNode {
+        "story_text/path_choice.txt",
+        "Go west (Godrei's Fortress)", "Go East (Whispering Woods)",
+        ironVow, whisperingWoods,
+        false, 0, false, 0
+    };
+    campfire->right = pathChoice;
+    
+    auto runeLearn = new StoryNode {
+        "story_text/rune_stone.txt", // "You learned a word!"
+        "Return to Campfire", "Return to Campfire",
+        campfire, campfire,
+        false, 0, false, 1 // Learn word here "FUS"
+    };
+
     auto runeDiscovery = new StoryNode {
         "story_text/rune_discovery.txt",
         "Touch the Stone", "Leave it be",
         runeLearn, campfire,
         false, 0, false, 0 // No event yet
     };
-
-    campfire->right = pathChoice;
 
     // Wolf Battle
     auto wolfBattle = new StoryNode{
@@ -343,8 +388,6 @@ StoryNode* StoryTree::buildStory() {
         wolfBattle, wolfBattle,
         false, 0, false, 0
     };
-
-
 
     return startNode;
 }

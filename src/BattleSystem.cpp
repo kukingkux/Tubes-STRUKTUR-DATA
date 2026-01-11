@@ -7,11 +7,13 @@
 #include <limits>
 #include <vector>
 
-BattleResult startBattle(int& playerHP, Enemy enemy, Grimoire& grimoire) {
+BattleResult startBattle(int& playerHP, int& chaosPoints, Enemy enemy, Grimoire& grimoire) {
     if (textSettings.devMode) {
         UI::printSystemMessage(BOLD "[DEV MODE]" RESET "Skipping Battle...");
         return BATTLE_WIN;
     }
+
+    grimoire.resetCooldowns();
 
     bool battleOver = false;
     bool playerTurn = true;
@@ -26,7 +28,7 @@ BattleResult startBattle(int& playerHP, Enemy enemy, Grimoire& grimoire) {
             std::vector<std::string> options;
             options.push_back("Light Attack");
             options.push_back("Heavy Attack");
-            options.push_back("Use Words of Power");
+            options.push_back("Use Words of Power (Chaos +1)");
             UI::printMenu(options);
 
             int choice;
@@ -49,6 +51,10 @@ BattleResult startBattle(int& playerHP, Enemy enemy, Grimoire& grimoire) {
                 int wordDamage = grimoire.useWordInBattle();
                 if (wordDamage > 0) {
                     damage = wordDamage;
+
+                    chaosPoints += 1;
+                    UI::printBattleMessage("The raw energy of the Voice stains your soul... (Chaos +1)");
+
                     UI::printBattleMessage("You cast the Words of Power!");
                 } else {
                     UI::printBattleMessage("You fumbled the words...");
